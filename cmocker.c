@@ -4,6 +4,7 @@
 
 #include <sys/mman.h>
 #include <zconf.h>
+#include <stdint.h>
 
 #include "cmocker.h"
 
@@ -21,47 +22,23 @@ static int change_page_permissions_of_address(void *addr, int perms)
     return 0;
     }
 
-#define INSTR(_x) ((char)(_x))
+#define JMP_OP ((uint8_t)0xE9)
 
-int _mock_function_internal(void *originalFunctionAddr, void *mockFunction, void *jmpBuffer)
+int cmocker_mock(void *originalFunction, void *mockFunction)
     {
-    int rc;
+    int rc = 0;
 
-    rc = change_page_permissions_of_address(originalFunctionAddr, PROT_READ | PROT_WRITE | PROT_EXEC);
+    size_t *mockFunctionWords = (size_t *) mockFunction;
+    size_t *originalFunctionWords = (size_t *) originalFunction;
+
+    int32_t offset = (int64_t) mockFunctionWords - ((int64_t) originalFunctionWords + 5 * sizeof(char));
+
+    rc = change_page_permissions_of_address(originalFunction, PROT_READ | PROT_WRITE | PROT_EXEC);
 
     if (!rc)
         {
-        int i;
-        char *startAddr = (char *) originalFunctionAddr;
-
-        char *jmpBufferAddr = (char *) jmpBuffer;
-
-        for (i = 0; i < 8 + 4; ++i)
-            {
-            startAddr[i] = jmpBufferAddr[i];
-            }
-        }
-
-    rc = change_page_permissions_of_address(mockFunction, PROT_READ | PROT_WRITE | PROT_EXEC);
-    if (!rc)
-        {
-        int i;
-        char *startAddr = (char *) mockFunction;
-
-        /*   Replace function header:
-         *       55                      push   %rbp
-         *       48 89 e5                mov    %rsp,%rbp
-         *   to
-         *       48 31 c0                xor    %rax,%rax
-         *       90                      nop
-         */
-
-        char jmpBufferAddr[] = {INSTR(0x48), INSTR(0x31), INSTR(0xc0), INSTR(0x90)};
-
-        for (i = 0; i < 4; ++i)
-            {
-            startAddr[i] = jmpBufferAddr[i];
-            }
+        size_t instruction = (size_t) (JMP_OP | offset << 8);
+        *originalFunctionWords = instruction;
         }
 
     return rc;

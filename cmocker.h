@@ -8,14 +8,6 @@
 
 #define __cmocker_unused __attribute__((unused))
 
-#define DECLARE_MOCK(_mock_func_name) \
-	void cmocker_ ## _mock_func_name ## _mock() \
-	{asm volatile("jmpq *%0": : "r" (_mock_func_name));}
-
-#define mock_function(_original, _mock_fname) _mock_function_internal(_original, _mock_fname, cmocker_ ## _mock_fname ## _mock)
-
-int _mock_function_internal(void *originalFunctionAddr,
-                            void *mockFunction,
-                            void *jmpBuffer) __attribute__((nonnull(1, 2)));
+int cmocker_mock(void *originalFunction, void *mockFunction);
 
 #endif //CMOCKER_CMOCKER_H

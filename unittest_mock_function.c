@@ -97,16 +97,11 @@ int test4_mock(int argc, ...)
     return result + 10;
     }
 
-DECLARE_MOCK(test1_mock);
-DECLARE_MOCK(test2_mock);
-DECLARE_MOCK(test3_mock);
-DECLARE_MOCK(test4_mock);
-
 void test1()
     {
     setUpTearDown();
 
-    mock_function(test1_original, test1_mock);
+    cmocker_mock(test1_original, test1_mock);
     test1_original();
 
     assert(__globalTestState != NULL);
@@ -119,7 +114,7 @@ void test2()
     {
     setUpTearDown();
 
-    mock_function(test2_original, test2_mock);
+    cmocker_mock(test2_original, test2_mock);
     int actual = test2_original();
 
     assert(__globalTestState != NULL);
@@ -133,7 +128,7 @@ void test3()
     {
     setUpTearDown();
 
-    mock_function(test3_original, test3_mock);
+    cmocker_mock(test3_original, test3_mock);
 
     int var1 = 0;
     int actual = test3_original(&var1, 0);
@@ -150,7 +145,7 @@ void test4()
     {
     setUpTearDown();
 
-    mock_function(test4_original, test4_mock);
+    cmocker_mock(test4_original, test4_mock);
 
     int actual = test4_original(5, 1, 1, 1, 1);
     assert(__globalTestState != NULL);
