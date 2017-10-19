@@ -21,47 +21,9 @@ static int change_page_permissions_of_address(void *addr, int perms)
     return 0;
     }
 
-#if 0
-static const char commands[] =
-        {
-                //0x48, 0x8d, 0x05, 0x08, 0x00, 0x00, 0x00, // lea    0x8(%rip),%rax
-                //0x50,                                     // push   %rax
-                0xb8, 0xc4, 0x08, 0x40, 0x00,             // mov    $0x400854,%eax
-                0xff, 0xe0                                // jmpq   *%rax
-        };
+#define INSTR(_x) ((char)(_x))
 
-    //asm volatile("leaq 8(%rip), %rax");
-    //asm volatile("pushq %rax");
-    //asm volatile("jmp *%0": : "r" (function2_mock));
-    //asm volatile("goback_label:");
-
-#endif
-
-#if 0
-static void fill_mov_buffer(char *buffer, uint32_t addr)
-    {
-    int i;
-    for (i = 0; i < 4; ++i)
-        {
-        buffer[i] = (char)(addr & 0xFF);
-        addr >>= 8;
-        }
-    }
-
-    ...
-
-    uint32_t ptrVal = (uint32_t)le32toh(mockFunctionAddr);
-
-    char commandBuffer[] =
-            {
-                    0xb8, 0x00, 0x00, 0x00, 0x00, // mov    (0000000),%eax
-                    0xff, 0xe0                    // jmpq   *%rax
-            };
-
-    fill_mov_buffer(commandBuffer + 1, ptrVal);
-#endif
-
-int _mock_function_internal(void *originalFunctionAddr, void *jmpBuffer)
+int _mock_function_internal(void *originalFunctionAddr, void *mockFunction, void *jmpBuffer)
     {
     int rc;
 
@@ -72,14 +34,31 @@ int _mock_function_internal(void *originalFunctionAddr, void *jmpBuffer)
         int i;
         char *startAddr = (char *) originalFunctionAddr;
 
-        /*   Skip function header:
-         *      55                      push   %rbp
-         *      48 89 e5                mov    %rsp,%rbp
+        char *jmpBufferAddr = (char *) jmpBuffer;
+
+        for (i = 0; i < 8 + 4; ++i)
+            {
+            startAddr[i] = jmpBufferAddr[i];
+            }
+        }
+
+    rc = change_page_permissions_of_address(mockFunction, PROT_READ | PROT_WRITE | PROT_EXEC);
+    if (!rc)
+        {
+        int i;
+        char *startAddr = (char *) mockFunction;
+
+        /*   Replace function header:
+         *       55                      push   %rbp
+         *       48 89 e5                mov    %rsp,%rbp
+         *   to
+         *       48 31 c0                xor    %rax,%rax
+         *       90                      nop
          */
 
-        char *jmpBufferAddr = (char *) jmpBuffer + 4;
+        char jmpBufferAddr[] = {INSTR(0x48), INSTR(0x31), INSTR(0xc0), INSTR(0x90)};
 
-        for (i = 0; i < 8; ++i)
+        for (i = 0; i < 4; ++i)
             {
             startAddr[i] = jmpBufferAddr[i];
             }

@@ -1,11 +1,171 @@
 //
 // Created by cdeler on 10/19/17.
 //
+#include <stdlib.h>
+#include <memory.h>
+#include <assert.h>
+#include <stdarg.h>
 
 #include "cmocker.h"
 
+static char *__globalTestState = NULL;
+
+static void setUpTearDown()
+    {
+    if (__globalTestState)
+        free(__globalTestState);
+
+    __globalTestState = NULL;
+    }
+
+void test1_original(void)
+    {
+    __globalTestState = strdup("test1_original");
+    }
+
+int test2_original(void)
+    {
+    __globalTestState = strdup("test2_original");
+    return 5;
+    }
+
+int test3_original(int *pOutput, int input)
+    {
+    __globalTestState = strdup("test3_original");
+    *pOutput = 5;
+    return input + 5;
+    }
+
+int test4_original(int argc, ...)
+    {
+    int i, result = 0;
+
+    __globalTestState = strdup("test4_original");
+
+    va_list va;
+
+    va_start(va, argc);
+
+    for (i = 0; i < argc; ++i)
+        {
+        int arg = va_arg(va, int);
+
+        result += arg;
+        }
+
+    va_end(va);
+    return result;
+    }
+
+void test1_mock(void)
+    {
+    __globalTestState = strdup("test1_mock");
+    }
+
+int test2_mock(void)
+    {
+    __globalTestState = strdup("test2_mock");
+    return 10;
+    }
+
+int test3_mock(int *pOutput, int input)
+    {
+    __globalTestState = strdup("test3_mock");
+    *pOutput = 10;
+    return input + 10;
+    }
+
+int test4_mock(int argc, ...)
+    {
+    int i, result = 0;
+
+    __globalTestState = strdup("test4_mock");
+
+    va_list va;
+
+    va_start(va, argc);
+
+    for (i = 0; i < argc; ++i)
+        {
+        int arg = va_arg(va, int);
+
+        result += arg;
+        }
+
+    va_end(va);
+
+    return result + 10;
+    }
+
+DECLARE_MOCK(test1_mock);
+DECLARE_MOCK(test2_mock);
+DECLARE_MOCK(test3_mock);
+DECLARE_MOCK(test4_mock);
+
+void test1()
+    {
+    setUpTearDown();
+
+    mock_function(test1_original, test1_mock);
+    test1_original();
+
+    assert(__globalTestState != NULL);
+    assert(!strcmp("test1_mock", __globalTestState));
+
+    setUpTearDown();
+    }
+
+void test2()
+    {
+    setUpTearDown();
+
+    mock_function(test2_original, test2_mock);
+    int actual = test2_original();
+
+    assert(__globalTestState != NULL);
+    assert(!strcmp("test2_mock", __globalTestState));
+    assert(actual == 10);
+
+    setUpTearDown();
+    }
+
+void test3()
+    {
+    setUpTearDown();
+
+    mock_function(test3_original, test3_mock);
+
+    int var1 = 0;
+    int actual = test3_original(&var1, 0);
+
+    assert(__globalTestState != NULL);
+    assert(!strcmp("test3_mock", __globalTestState));
+    assert(actual == 10);
+    assert(var1 == 10);
+
+    setUpTearDown();
+    }
+
+void test4()
+    {
+    setUpTearDown();
+
+    mock_function(test4_original, test4_mock);
+
+    int actual = test4_original(5, 1, 1, 1, 1);
+    assert(__globalTestState != NULL);
+    assert(!strcmp("test4_mock", __globalTestState));
+    assert(actual == 15);
+
+    setUpTearDown();
+    }
+
 int main(int argc __cmocker_unused, char **argv __cmocker_unused)
     {
+    test1();
+    test2();
+    test3();
+    test4();
 
     return 0;
     }
