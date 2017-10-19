@@ -6,6 +6,8 @@
 #ifndef CMOCKER_CMOCKER_H
 #define CMOCKER_CMOCKER_H
 
+#define __cmocker_unused __attribute__((unused))
+
 #define DECLARE_MOCK(_mock_func_name) \
 	void cmocker_ ## _mock_func_name ## _mock() \
 	{asm volatile("jmpq *%0": : "r" (_mock_func_name));}
