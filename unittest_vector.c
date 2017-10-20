@@ -16,6 +16,7 @@ void test1_smoke()
     assert(v->vectorSize == 0);
     assert(v->items == 0);
     assert(v->elementsCount == 0);
+    assert(!strcmp(v->eyeCatcher, VECTOR_EYECATCHER_VALUE));
 
     int rc = vector_close(&v);
     assert(v == NULL);

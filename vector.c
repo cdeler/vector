@@ -19,7 +19,8 @@ void vector_enlarge(Vector *pVector)
 
             pVector->vectorSize = ENLARGE_FACTOR(pVector->vectorSize);
             pVector->items = calloc(sizeof(void *), pVector->vectorSize);
-            } else
+            }
+        else
             {
             assert(pVector->items);
 
