@@ -122,8 +122,11 @@ int vector_removeAt(Vector *pVector, size_t index)
             pVector->deleter(element);
 
         size_t vectorTailSize = pVector->elementsCount - (index + 1);
-        memmove(pVector->items + index, pVector->items + index + 1, vectorTailSize * sizeof(void *));
-        pVector->items[pVector->elementsCount] = NULL;
+
+        if (vectorTailSize)
+            memmove(pVector->items + index, pVector->items + index + 1, vectorTailSize * sizeof(void *));
+
+        pVector->items[pVector->elementsCount - 1] = NULL;
 
         pVector->elementsCount -= 1;
         rc = 0;
