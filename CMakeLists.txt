@@ -13,14 +13,13 @@ set(CMAKE_TESTS_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tests)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
-
-set(CMOCKER_SOURCE_FILES cmocker.c cmocker.h)
+set(CMOCKER_SOURCE_FILES vector.c vector.h cmocker.c cmocker.h)
 
 add_library(cmocker STATIC ${CMOCKER_SOURCE_FILES})
 
 add_custom_target(build_tests)
 
-set(UNIT_TESTS_LIST unittest_mock_function.c)
+set(UNIT_TESTS_LIST unittest_mock_function.c unittest_vector.c)
 
 enable_testing()
 
