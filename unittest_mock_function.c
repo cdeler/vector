@@ -147,7 +147,7 @@ void test4()
 
     cmocker_mock(test4_original, test4_mock);
 
-    int actual = test4_original(5, 1, 1, 1, 1);
+    int actual = test4_original(5, 1, 1, 1, 1, 1);
     assert(__globalTestState != NULL);
     assert(!strcmp("test4_mock", __globalTestState));
     assert(actual == 15);
