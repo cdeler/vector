@@ -107,3 +107,27 @@ void vector_set_deleter(Vector *pVector, VectorDeleter deleter)
 
     pVector->deleter = deleter;
     }
+
+int vector_removeAt(Vector *pVector, size_t index)
+    {
+    assert(pVector);
+    assert (index < pVector->elementsCount);
+    int rc = -1;
+
+    if (index < pVector->elementsCount)
+        {
+        void *element = pVector->items[index];
+
+        if (pVector->deleter)
+            pVector->deleter(element);
+
+        size_t vectorTailSize = pVector->elementsCount - (index + 1);
+        memmove(pVector->items + index, pVector->items + index + 1, vectorTailSize * sizeof(void *));
+        pVector->items[pVector->elementsCount] = NULL;
+
+        pVector->elementsCount -= 1;
+        rc = 0;
+        }
+
+    return rc;
+    }
