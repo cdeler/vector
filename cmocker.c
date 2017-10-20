@@ -5,6 +5,7 @@
 #include <sys/mman.h>
 #include <zconf.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "utils/vector.h"
 #include "cmocker.h"
@@ -14,6 +15,7 @@ typedef struct
     void *functionAddr;
     size_t originHeader;
     size_t mockedHeader;
+    int isMocked;
     } FunctionHandle;
 
 static Vector *_functionHandles = NULL;
@@ -22,12 +24,34 @@ static void __attribute__((constructor)) __cmocker_used
 init()
     {
     _functionHandles = vector_open();
+    vector_set_deleter(_functionHandles, free);
     }
 
 static void __attribute__((destructor)) __cmocker_used
 finit()
     {
     vector_close(&_functionHandles);
+    }
+
+static int
+is_already_mocked(void *function)
+    {
+    size_t i;
+    int result = false;
+    size_t N = vector_getLength(_functionHandles);
+
+    for (i = 0; i < N; ++i)
+        {
+        FunctionHandle *handle = vector_elementAt(_functionHandles, i);
+
+        if (handle->functionAddr == function)
+            {
+            result = true;
+            break;
+            }
+        }
+
+    return result;
     }
 
 static int
@@ -50,19 +74,32 @@ change_page_permissions_of_address(void *addr, int perms)
 int
 cmocker_mock(void *originalFunction, void *mockFunction)
     {
-    int rc = 0;
+    int rc = -1;
 
-    size_t *mockFunctionWords = (size_t *) mockFunction;
-    size_t *originalFunctionWords = (size_t *) originalFunction;
-
-    int32_t offset = (int64_t) mockFunctionWords - ((int64_t) originalFunctionWords + 5 * sizeof(char));
-
-    rc = change_page_permissions_of_address(originalFunction, PROT_READ | PROT_WRITE | PROT_EXEC);
-
-    if (!rc)
+    if (!is_already_mocked(originalFunction))
         {
-        size_t instruction = (size_t) (JMP_OP | offset << 8);
-        *originalFunctionWords = instruction;
+        size_t *mockFunctionWords = (size_t *) mockFunction;
+        size_t *originalFunctionWords = (size_t *) originalFunction;
+
+        int32_t offset = (int64_t) mockFunctionWords - ((int64_t) originalFunctionWords + 5 * sizeof(char));
+
+        rc = change_page_permissions_of_address(originalFunction, PROT_READ | PROT_WRITE | PROT_EXEC);
+
+        if (!rc)
+            {
+            size_t instruction = (size_t) (JMP_OP | offset << 8);
+            FunctionHandle *handle = calloc(1, sizeof(FunctionHandle));
+            handle->functionAddr = originalFunction;
+            handle->mockedHeader = instruction;
+            handle->originHeader = *originalFunctionWords;
+            handle->isMocked = true;
+            vector_add(_functionHandles, handle);
+
+            *originalFunctionWords = instruction;
+
+            rc = 0;
+            }
+
         }
 
     return rc;

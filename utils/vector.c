@@ -123,6 +123,14 @@ vector_elementAt(Vector *pVector, size_t index)
     return (pVector && index < pVector->elementsCount) ? ELEMENT_AT_INTERNAL(pVector, index) : NULL;
     }
 
+size_t
+vector_getLength(Vector *pVector)
+    {
+    assert(pVector);
+
+    return pVector ? pVector->elementsCount : 0;
+    }
+
 int
 vector_removeAt(Vector *pVector, size_t index)
     {
