@@ -7,6 +7,8 @@
 
 #include "vector.h"
 
+#define ELEMENT_AT_INTERNAL(_v, _idx) ((_v)->items[(_idx)])
+
 void vector_enlarge(Vector *pVector)
     {
     assert(pVector);
@@ -83,7 +85,7 @@ int vector_close(Vector **ppVector)
 
             for (i = 0; i < pVector->elementsCount; ++i)
                 {
-                void *item = pVector->items[i];
+                void *item = ELEMENT_AT_INTERNAL(pVector, i);
 
                 if (pVector->deleter)
                     pVector->deleter(item);
@@ -108,14 +110,21 @@ void vector_set_deleter(Vector *pVector, VectorDeleter deleter)
     pVector->deleter = deleter;
     }
 
+void *vector_elementAt(Vector *pVector, size_t index)
+    {
+    assert(pVector);
+
+    return (pVector && index < pVector->elementsCount) ? ELEMENT_AT_INTERNAL(pVector, index) : NULL;
+    }
+
 int vector_removeAt(Vector *pVector, size_t index)
     {
     assert(pVector);
     int rc = -1;
 
-    if (index < pVector->elementsCount)
+    if (pVector && index < pVector->elementsCount)
         {
-        void *element = pVector->items[index];
+        void *element = ELEMENT_AT_INTERNAL(pVector, index);
 
         if (pVector->deleter)
             pVector->deleter(element);
