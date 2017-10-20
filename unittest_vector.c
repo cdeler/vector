@@ -145,6 +145,9 @@ void test4_element_remove()
         assert(!strcmp(buffer, element));
         }
 
+    assert(vector_removeAt(v, 5555) < 0);
+    assert(v->elementsCount == 7);
+
     vector_close(&v);
 
     }

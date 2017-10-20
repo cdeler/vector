@@ -111,7 +111,6 @@ void vector_set_deleter(Vector *pVector, VectorDeleter deleter)
 int vector_removeAt(Vector *pVector, size_t index)
     {
     assert(pVector);
-    assert (index < pVector->elementsCount);
     int rc = -1;
 
     if (index < pVector->elementsCount)
