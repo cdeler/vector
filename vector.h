@@ -2,6 +2,7 @@
 // Created by cdeler on 10/20/17.
 //
 
+#pragma once
 #ifndef CMOCKER_VECTOR_H
 #define CMOCKER_VECTOR_H
 
