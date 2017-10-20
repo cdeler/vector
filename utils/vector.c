@@ -9,7 +9,8 @@
 
 #define ELEMENT_AT_INTERNAL(_v, _idx) ((_v)->items[(_idx)])
 
-void vector_enlarge(Vector *pVector)
+void
+vector_enlarge(Vector *pVector)
     {
     assert(pVector);
 
@@ -39,14 +40,16 @@ void vector_enlarge(Vector *pVector)
 
     }
 
-Vector *vector_open(void)
+Vector *
+vector_open(void)
     {
     Vector *result = calloc(1, sizeof(Vector));
     strcpy(result->eyeCatcher, VECTOR_EYECATCHER_VALUE);
     return result;
     }
 
-int vector_add(Vector *pVector, void *item)
+int
+vector_add(Vector *pVector, void *item)
     {
     assert(pVector);
     assert(item);
@@ -69,7 +72,8 @@ int vector_add(Vector *pVector, void *item)
     return rc;
     }
 
-int vector_close(Vector **ppVector)
+int
+vector_close(Vector **ppVector)
     {
     assert(ppVector);
     int rc = -1;
@@ -103,21 +107,24 @@ int vector_close(Vector **ppVector)
     return rc;
     }
 
-void vector_set_deleter(Vector *pVector, VectorDeleter deleter)
+void
+vector_set_deleter(Vector *pVector, VectorDeleter deleter)
     {
     assert(pVector);
 
     pVector->deleter = deleter;
     }
 
-void *vector_elementAt(Vector *pVector, size_t index)
+void *
+vector_elementAt(Vector *pVector, size_t index)
     {
     assert(pVector);
 
     return (pVector && index < pVector->elementsCount) ? ELEMENT_AT_INTERNAL(pVector, index) : NULL;
     }
 
-int vector_removeAt(Vector *pVector, size_t index)
+int
+vector_removeAt(Vector *pVector, size_t index)
     {
     assert(pVector);
     int rc = -1;

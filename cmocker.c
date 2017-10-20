@@ -6,9 +6,32 @@
 #include <zconf.h>
 #include <stdint.h>
 
+#include "utils/vector.h"
 #include "cmocker.h"
 
-static int change_page_permissions_of_address(void *addr, int perms)
+typedef struct
+    {
+    void *functionAddr;
+    size_t originHeader;
+    size_t mockedHeader;
+    } FunctionHandle;
+
+static Vector *_functionHandles = NULL;
+
+static void __attribute__((constructor)) __cmocker_used
+init()
+    {
+    _functionHandles = vector_open();
+    }
+
+static void __attribute__((destructor)) __cmocker_used
+finit()
+    {
+    vector_close(&_functionHandles);
+    }
+
+static int
+change_page_permissions_of_address(void *addr, int perms)
     {
     // Move the pointer to the page boundary
     size_t page_size = (size_t) getpagesize();
@@ -24,7 +47,8 @@ static int change_page_permissions_of_address(void *addr, int perms)
 
 #define JMP_OP ((uint8_t)0xE9)
 
-int cmocker_mock(void *originalFunction, void *mockFunction)
+int
+cmocker_mock(void *originalFunction, void *mockFunction)
     {
     int rc = 0;
 

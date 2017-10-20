@@ -7,6 +7,7 @@
 #define CMOCKER_CMOCKER_H
 
 #define __cmocker_unused __attribute__((unused))
+#define __cmocker_used __attribute__((used))
 
 int cmocker_mock(void *originalFunction, void *mockFunction);
 
