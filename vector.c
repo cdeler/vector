@@ -3,14 +3,65 @@
 //
 
 #include <assert.h>
+#include <memory.h>
 
 #include "vector.h"
+
+void vector_enlarge(Vector *pVector)
+    {
+    assert(pVector);
+
+    if (pVector)
+        {
+        if (!pVector->vectorSize)
+            {
+            assert(pVector->items == NULL);
+
+            pVector->vectorSize = ENLARGE_FACTOR(pVector->vectorSize);
+            pVector->items = calloc(sizeof(void *), pVector->vectorSize);
+            } else
+            {
+            assert(pVector->items);
+
+            size_t oldSize = pVector->vectorSize;
+            pVector->vectorSize = ENLARGE_FACTOR(pVector->vectorSize);
+            void **items = calloc(sizeof(void *), pVector->vectorSize);
+
+            memmove(items, pVector->items, oldSize);
+            pVector->items = items;
+            }
+        }
+
+    }
 
 Vector *vector_open(void)
     {
     Vector *result = calloc(sizeof(Vector), 1);
-
+    strcpy(result->eyeCatcher, VECTOR_EYECATCHER_VALUE);
     return result;
+    }
+
+int vector_add(Vector *pVector, void *item)
+    {
+    assert(pVector);
+    assert(item);
+
+    int rc = -1;
+
+    if (pVector && item)
+        {
+        if (pVector->elementsCount == pVector->vectorSize)
+            vector_enlarge(pVector);
+
+        void **pLastElement = pVector->items + pVector->elementsCount;
+
+        *pLastElement = item;
+
+        pVector->elementsCount += 1;
+        rc = 0;
+        }
+
+    return rc;
     }
 
 int vector_close(Vector **ppVector)
@@ -26,13 +77,14 @@ int vector_close(Vector **ppVector)
             {
             size_t i;
             rc = 0;
-            VectorDeleter deleter = pVector->deleter ? pVector->deleter : free;
 
-            for (i = 0; i < pVector->vectorSize; ++i)
+            for (i = 0; i < pVector->elementsCount; ++i)
                 {
-                void *item = pVector->items + i;
+                void *item = pVector->items[i];
 
-                deleter(item);
+                if (pVector->deleter)
+                    pVector->deleter(item);
+
                 rc += 1;
                 }
 
@@ -45,7 +97,7 @@ int vector_close(Vector **ppVector)
     return rc;
     }
 
-void set_deleter(Vector *pVector, VectorDeleter deleter)
+void vector_set_deleter(Vector *pVector, VectorDeleter deleter)
     {
     assert(pVector);
 

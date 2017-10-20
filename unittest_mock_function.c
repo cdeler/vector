@@ -97,7 +97,7 @@ int test4_mock(int argc, ...)
     return result + 10;
     }
 
-void test1()
+void test1_smoke()
     {
     setUpTearDown();
 
@@ -157,7 +157,7 @@ void test4()
 
 int main(int argc __cmocker_unused, char **argv __cmocker_unused)
     {
-    test1();
+    test1_smoke();
     test2();
     test3();
     test4();
