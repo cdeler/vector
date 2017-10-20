@@ -23,7 +23,7 @@ void test1_smoke()
     assert(rc == 0);
     }
 
-void test1_vector_enlarge()
+void test2_vector_enlarge()
     {
     size_t i;
     Vector *v = vector_open();
@@ -74,7 +74,7 @@ void test3_vector_add()
 int main(int argc __cmocker_unused, char **argv __cmocker_unused)
     {
     test1_smoke();
-    test1_vector_enlarge();
+    test2_vector_enlarge();
     test3_vector_add();
 
     return 0;

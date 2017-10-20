@@ -18,7 +18,7 @@ void vector_enlarge(Vector *pVector)
             assert(pVector->items == NULL);
 
             pVector->vectorSize = ENLARGE_FACTOR(pVector->vectorSize);
-            pVector->items = calloc(sizeof(void *), pVector->vectorSize);
+            pVector->items = calloc(pVector->vectorSize, sizeof(void *));
             }
         else
             {
@@ -26,9 +26,11 @@ void vector_enlarge(Vector *pVector)
 
             size_t oldSize = pVector->vectorSize;
             pVector->vectorSize = ENLARGE_FACTOR(pVector->vectorSize);
-            void **items = calloc(sizeof(void *), pVector->vectorSize);
+            void **items = calloc(pVector->vectorSize, sizeof(void *));
 
             memmove(items, pVector->items, oldSize);
+            free(pVector->items);
+
             pVector->items = items;
             }
         }
@@ -37,7 +39,7 @@ void vector_enlarge(Vector *pVector)
 
 Vector *vector_open(void)
     {
-    Vector *result = calloc(sizeof(Vector), 1);
+    Vector *result = calloc(1, sizeof(Vector));
     strcpy(result->eyeCatcher, VECTOR_EYECATCHER_VALUE);
     return result;
     }
@@ -90,6 +92,7 @@ int vector_close(Vector **ppVector)
                 }
 
             free(pVector->items);
+            free(pVector);
             }
 
         *ppVector = NULL;
