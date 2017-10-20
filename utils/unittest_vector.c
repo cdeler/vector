@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <memory.h>
 
-#include "cmocker.h"
+#include "../cmocker.h"
 #include "vector.h"
 
 void test1_smoke()
