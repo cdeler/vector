@@ -14,6 +14,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
 add_subdirectory(utils)
+include(utils/CodeCoverage.cmake)
 
 set(CMOCKER_SOURCE_FILES cmocker.c cmocker.h)
 add_library(cmocker STATIC ${CMOCKER_SOURCE_FILES})
@@ -34,3 +35,6 @@ foreach(TEST_NAME ${UNIT_TESTS_LIST})
     set_tests_properties(${TEST_NAME} PROPERTIES TIMEOUT 5)
 endforeach(TEST_NAME)
 
+if (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+    SETUP_TARGET_FOR_COVERAGE(coverage ctest "coverage_data")
+endif (CMAKE_BUILD_TYPE STREQUAL "Coverage")

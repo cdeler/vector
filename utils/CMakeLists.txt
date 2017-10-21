@@ -9,8 +9,16 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 set(CMAKE_TESTS_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tests)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+
+#if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+#    message("Debug config")
+#    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+#endif("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+
+#message("${CMAKE_C_FLAGS}")
 
 set(SOURCE_FILES vector.c vector.h)
 add_library(utils STATIC ${SOURCE_FILES})
