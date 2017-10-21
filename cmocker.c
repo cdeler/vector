@@ -37,7 +37,7 @@ static int
 is_already_mocked(void *function)
     {
     size_t i;
-    int result = false;
+    int result = -1;
     size_t N = vector_getLength(_functionHandles);
 
     for (i = 0; i < N; ++i)
@@ -46,7 +46,7 @@ is_already_mocked(void *function)
 
         if (handle->functionAddr == function)
             {
-            result = true;
+            result = (int) i;
             break;
             }
         }
@@ -76,7 +76,7 @@ cmocker_mock(void *originalFunction, void *mockFunction)
     {
     int rc = -1;
 
-    if (!is_already_mocked(originalFunction))
+    if (is_already_mocked(originalFunction) < 0)
         {
         size_t *mockFunctionWords = (size_t *) mockFunction;
         size_t *originalFunctionWords = (size_t *) originalFunction;
@@ -100,6 +100,29 @@ cmocker_mock(void *originalFunction, void *mockFunction)
             rc = 0;
             }
 
+        }
+
+    return rc;
+    }
+
+int
+cmocker_restore_origin(void *originalFunction)
+    {
+    int handleIndex;
+    int rc = -1;
+
+    if ((handleIndex = is_already_mocked(originalFunction)) >= 0)
+        {
+        FunctionHandle *handle = vector_elementAt(_functionHandles, (size_t) handleIndex);
+
+        handle->isMocked = false;
+
+        size_t *functionWords = handle->functionAddr;
+        *functionWords = handle->originHeader;
+
+        vector_removeAt(_functionHandles, handleIndex);
+
+        rc = 0;
         }
 
     return rc;

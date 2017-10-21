@@ -69,6 +69,12 @@ test5_original()
     }
 
 void
+test6_original()
+    {
+    __globalTestState = strdup("test6_original");
+    }
+
+void
 test1_mock(void)
     {
     __globalTestState = strdup("test1_mock");
@@ -116,6 +122,12 @@ void
 test5_mock()
     {
     __globalTestState = strdup("test5_mock");
+    }
+
+void
+test6_mock()
+    {
+    __globalTestState = strdup("test6_mock");
     }
 
 void
@@ -198,6 +210,38 @@ test5_mock_twice()
     setUpTearDown();
     }
 
+void
+test6_restore_origin()
+    {
+    int rc;
+    setUpTearDown();
+
+    rc = cmocker_restore_origin(test6_original);
+    assert(rc < 0);
+
+    cmocker_mock(test6_original, test6_mock);
+    test6_original();
+    assert(__globalTestState != NULL);
+    assert(!strcmp("test6_mock", __globalTestState));
+
+    setUpTearDown();
+    rc = cmocker_restore_origin(test6_original);
+    assert(rc == 0);
+
+    test6_original();
+    assert(__globalTestState != NULL);
+    assert(!strcmp("test6_original", __globalTestState));
+    setUpTearDown();
+
+    rc = cmocker_restore_origin(test6_original);
+    test6_original();
+    assert(rc < 0);
+    assert(__globalTestState != NULL);
+    assert(!strcmp("test6_original", __globalTestState));
+
+    setUpTearDown();
+    }
+
 int
 main(int argc __cmocker_unused, char **argv __cmocker_unused)
     {
@@ -206,6 +250,7 @@ main(int argc __cmocker_unused, char **argv __cmocker_unused)
     test3();
     test4();
     test5_mock_twice();
+    test6_restore_origin();
 
     return 0;
     }
