@@ -1,8 +1,11 @@
 dist:     xenial
 language: c
-
+sudo: required
 os: linux
 
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq valgrind
 compiler:
   - gcc
   - clang

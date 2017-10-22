@@ -40,6 +40,4 @@ if (CMAKE_BUILD_TYPE STREQUAL "Coverage")
     SETUP_TARGET_FOR_COVERAGE(coverage ctest "coverage_data")
 endif (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 
-if (NOT (${VALGRIND_PATH} STREQUAL ""))
-    SETUP_VALGRIND_BUILD(valgrind ctest)
-endif(NOT (${VALGRIND_PATH} STREQUAL ""))
+SETUP_VALGRIND_BUILD(valgrind ctest)
