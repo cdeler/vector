@@ -15,6 +15,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
 add_subdirectory(utils)
 include(utils/CodeCoverage.cmake)
+include(utils/Valgrind.cmake)
 
 set(CMOCKER_SOURCE_FILES cmocker.c cmocker.h)
 add_library(cmocker STATIC ${CMOCKER_SOURCE_FILES})
@@ -38,3 +39,7 @@ endforeach(TEST_NAME)
 if (CMAKE_BUILD_TYPE STREQUAL "Coverage")
     SETUP_TARGET_FOR_COVERAGE(coverage ctest "coverage_data")
 endif (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+
+if (NOT (${VALGRIND_PATH} STREQUAL ""))
+    SETUP_VALGRIND_BUILD(valgrind ctest)
+endif(NOT (${VALGRIND_PATH} STREQUAL ""))
