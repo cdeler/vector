@@ -13,9 +13,12 @@ set(CMAKE_TESTS_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tests)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
-add_subdirectory(utils)
+add_custom_target(valgrind)
+
 include(utils/CodeCoverage.cmake)
 include(utils/Valgrind.cmake)
+
+add_subdirectory(utils)
 
 set(CMOCKER_SOURCE_FILES cmocker.c cmocker.h)
 add_library(cmocker STATIC ${CMOCKER_SOURCE_FILES})
@@ -33,6 +36,7 @@ foreach(TEST_NAME ${UNIT_TESTS_LIST})
     target_link_libraries(${TEST_NAME} cmocker utils)
 
     add_test(${TEST_NAME} ${CMAKE_TESTS_OUTPUT_DIRECTORY}/${TEST_NAME})
+    add_valgrind_check(valgrind ${TEST_NAME})
     set_tests_properties(${TEST_NAME} PROPERTIES TIMEOUT 5)
 endforeach(TEST_NAME)
 
@@ -40,4 +44,3 @@ if (CMAKE_BUILD_TYPE STREQUAL "Coverage")
     SETUP_TARGET_FOR_COVERAGE(coverage ctest "coverage_data")
 endif (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 
-SETUP_VALGRIND_BUILD(valgrind ctest)

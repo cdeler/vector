@@ -9,17 +9,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 set(CMAKE_TESTS_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tests)
 
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
-
-#if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-#    message("Debug config")
-#    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
-#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
-#endif("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-
-#message("${CMAKE_C_FLAGS}")
-
 set(SOURCE_FILES vector.c vector.h)
 add_library(utils STATIC ${SOURCE_FILES})
 set(UNIT_TESTS_LIST unittest_vector.c)
@@ -34,6 +23,7 @@ foreach (TEST_NAME ${UNIT_TESTS_LIST})
     target_link_libraries(${TEST_NAME} cmocker)
 
     add_test(${TEST_NAME} ${CMAKE_TESTS_OUTPUT_DIRECTORY}/${TEST_NAME})
+    add_valgrind_check(valgrind ${TEST_NAME})
     set_tests_properties(${TEST_NAME} PROPERTIES TIMEOUT 5)
 endforeach (TEST_NAME)
 
