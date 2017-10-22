@@ -55,6 +55,7 @@ void test2_vector_enlarge()
 
 void test3_vector_add()
     {
+    int rc;
     Vector *v = vector_open();
     vector_set_deleter(v, free);
 
@@ -68,7 +69,8 @@ void test3_vector_add()
     char *firstElement = v->items[0];
     assert(!strcmp(firstElement, "foo"));
 
-    assert(vector_close(&v) == 1);
+    rc = vector_close(&v);
+    assert(rc == 1);
     }
 
 void test4_element_remove()

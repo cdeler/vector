@@ -13,6 +13,7 @@ compiler:
 env:
   - BUILD_CONFIGURATION=Debug
   - BUILD_CONFIGURATION=Release
+  - BUILD_CONFIGURATION=RelWithDebInfo
 
 script:
   - mkdir build
