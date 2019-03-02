@@ -88,7 +88,7 @@ vector_close(Vector **ppVector)
 				{
 				for (i = 0, rc = 0; i < pVector->elementsCount; ++i, ++rc)
 					{
-					void *item = pVector[i];
+					void *item = pVector->items[i];
 
 					pVector->deleter(item);
 
@@ -145,7 +145,7 @@ vector_removeAt(Vector *pVector, size_t index)
 
 	if (pVector && index < pVector->elementsCount)
 		{
-		void *element = pVector[index];
+		void *element = pVector->items[index];
 
 		if (pVector->deleter)
 			pVector->deleter(element);
