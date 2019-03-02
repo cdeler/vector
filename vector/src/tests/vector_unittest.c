@@ -42,74 +42,80 @@ static void test_vector_add()
 
 static void test_removeAt()
 	{
+	void *data;
+	size_t i;
+	char c;
 	Vector *pVector = vector_open();
 
 	vector_pushBack(pVector, "first");
 	assert(vector_getLength(pVector) == 1);
-	assert(vector_removeAt(pVector, 0) == 0);
+	data = vector_removeAt(pVector, 0);
+	assert(data);
+	assert(!strcmp(data, "first"));
 	assert(vector_getLength(pVector) == 0);
 
 	vector_pushBack(pVector, "first");
 	vector_pushBack(pVector, "second");
 	vector_pushBack(pVector, "third");
 	assert(vector_getLength(pVector) == 3);
-	assert(vector_removeAt(pVector, 1) == 0);
+	data = vector_removeAt(pVector, 1);
+	assert(data);
+	assert(!strcmp(data, "second"));
 	assert(vector_getLength(pVector) == 2);
 	assert(!strcmp(vector_elementAt(pVector, 0), "first"));
 	assert(!strcmp(vector_elementAt(pVector, 1), "third"));
 
-	assert(vector_removeAt(pVector, 1) == 0);
+	assert(!strcmp(vector_removeAt(pVector, 1), "third"));
+
 	assert(vector_getLength(pVector) == 1);
 	assert(!strcmp(vector_elementAt(pVector, 0), "first"));
 
 	vector_close(&pVector);
 
 	pVector = vector_open();
-	vector_set_deleter(pVector, free);
-	char c;
-	size_t i;
-	char buffer[2] = "X";
 	for (c = '0'; c <= '9'; ++c)
 		{
-		*buffer = c;
-		vector_pushBack(pVector, strdup(buffer));
+		vector_pushBack(pVector, (void *) c);
 		}
 	assert(vector_getLength(pVector) == 10);
 
-	assert(vector_removeAt(pVector, 9) == 0);
-	assert(vector_getLength(pVector) == 9);
-	for (c = '0', i = 0; c <= '8'; ++c, ++i)
+	c = (char) vector_removeAt(pVector, 9);
+	assert(c == '9');
+	static const char expectedVec1[] = "012345678";
+	static const size_t expectedVec1Size = (sizeof(expectedVec1) / sizeof(char)) - 1;
+
+	assert(vector_getLength(pVector) == expectedVec1Size);
+	for (i = 0; i < expectedVec1Size; ++i)
 		{
-		*buffer = c;
-		assert(!strcmp(vector_elementAt(pVector, i), buffer));
+		assert((char) vector_elementAt(pVector, i) == expectedVec1[i]);
 		}
 
-	assert(vector_removeAt(pVector, 0) == 0);
-	assert(vector_getLength(pVector) == 8);
-	for (c = '1', i = 0; c <= '8'; ++c, ++i)
+	assert((char) vector_removeAt(pVector, 0) == '0');
+	static const char expectedVec2[] = "12345678";
+	static const size_t expectedVec2Size = (sizeof(expectedVec2) / sizeof(char)) - 1;
+
+	assert(vector_getLength(pVector) == expectedVec2Size);
+	for (i = 0; i < expectedVec2Size; ++i)
 		{
-		*buffer = c;
-		assert(!strcmp(vector_elementAt(pVector, i), buffer));
+		assert((char) vector_elementAt(pVector, i) == expectedVec2[i]);
 		}
 
-	assert(vector_removeAt(pVector, 3) == 0);
-	assert(vector_getLength(pVector) == 7);
-	for (c = '1', i = 0; c <= '3'; ++c, ++i)
+	c = (char) vector_removeAt(pVector, 3);
+	assert(c == '4');
+
+	static const char expectedVec3[] = "1235678";
+	static const size_t expectedVec3Size = (sizeof(expectedVec3) / sizeof(char)) - 1;
+
+	assert(vector_getLength(pVector) == expectedVec3Size);
+	for (i = 0; i < expectedVec3Size; ++i)
 		{
-		*buffer = c;
-		assert(!strcmp(vector_elementAt(pVector, i), buffer));
-		}
-	for (c = '5'; c <= '8'; ++c, ++i)
-		{
-		*buffer = c;
-		assert(!strcmp(vector_elementAt(pVector, i), buffer));
+		assert((char) vector_elementAt(pVector, i) == expectedVec3[i]);
 		}
 
-	assert(vector_removeAt(pVector, 5555) < 0);
+	assert(vector_removeAt(pVector, 5555) == NULL);
 	assert(vector_getLength(pVector) == 7);
 
 	vector_close(&pVector);
-
 	}
 
 #define TEST5_VECTOR_SIZE (10000000ULL)

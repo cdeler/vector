@@ -7,38 +7,39 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <malloc.h>
+#include <assert.h>
 
 #include "vector.h"
 #include "cmocker.h"
 
 typedef struct
-    {
+{
     void *functionAddr;
     size_t originHeader;
     size_t mockedHeader;
     int isMocked;
-    } FunctionHandle;
+} FunctionHandle;
 
 static Vector *_functionHandles = NULL;
 
 static void __attribute__((constructor)) __cmocker_used
-init()
+_cmoker_module_init()
     {
     _functionHandles = vector_open();
     vector_set_deleter(_functionHandles, free);
     }
 
 static void __attribute__((destructor)) __cmocker_used
-finit()
+_cmocker_module_finit()
     {
     vector_close(&_functionHandles);
     }
 
-static int
-is_already_mocked(void *function)
+static ssize_t
+_is_already_mocked(void *function)
     {
     size_t i;
-    int result = -1;
+    ssize_t result = -1;
     size_t N = vector_getLength(_functionHandles);
 
     for (i = 0; i < N; ++i)
@@ -47,7 +48,8 @@ is_already_mocked(void *function)
 
         if (handle->functionAddr == function)
             {
-            result = (int) i;
+            assert(i <= SSIZE_MAX);
+            result = (ssize_t) i;
             break;
             }
         }
@@ -77,7 +79,7 @@ cmocker_mock(void *originalFunction, void *mockFunction)
     {
     int rc = -1;
 
-    if (is_already_mocked(originalFunction) < 0)
+    if (_is_already_mocked(originalFunction) < 0)
         {
         size_t *mockFunctionWords = (size_t *) mockFunction;
         size_t *originalFunctionWords = (size_t *) originalFunction;
@@ -100,7 +102,6 @@ cmocker_mock(void *originalFunction, void *mockFunction)
 
             rc = 0;
             }
-
         }
 
     return rc;
@@ -109,10 +110,10 @@ cmocker_mock(void *originalFunction, void *mockFunction)
 int
 cmocker_restore_origin(void *originalFunction)
     {
-    int handleIndex;
+    ssize_t handleIndex;
     int rc = -1;
 
-    if ((handleIndex = is_already_mocked(originalFunction)) >= 0)
+    if ((handleIndex = _is_already_mocked(originalFunction)) >= 0)
         {
         FunctionHandle *handle = vector_elementAt(_functionHandles, (size_t) handleIndex);
 
@@ -121,8 +122,8 @@ cmocker_restore_origin(void *originalFunction)
         size_t *functionWords = handle->functionAddr;
         *functionWords = handle->originHeader;
 
-        vector_removeAt(_functionHandles, handleIndex);
-
+        handle = vector_removeAt(_functionHandles, (size_t) handleIndex);
+        free(handle);
         rc = 0;
         }
 

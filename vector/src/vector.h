@@ -18,7 +18,7 @@ Vector *vector_open(void);
 size_t vector_close(Vector **ppVector) __attribute__((nonnull (1)));
 
 int vector_pushBack(Vector *pVector, void *item) __attribute__((nonnull (1)));
-int vector_removeAt(Vector *pVector, size_t index) __attribute__((nonnull (1)));
+void * vector_removeAt(Vector *pVector, size_t index) __attribute__((nonnull (1)));
 void *vector_elementAt(Vector *pVector, size_t index) __attribute__((nonnull (1)));
 size_t vector_getLength(Vector *pVector) __attribute__((nonnull (1)));
 

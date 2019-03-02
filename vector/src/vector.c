@@ -146,29 +146,27 @@ vector_getLength(Vector *pVector)
 	}
 
 
-int
+void *
 vector_removeAt(Vector *pVector, size_t index)
 	{
 	assert(pVector);
-	int rc = -1;
+	void *result = NULL;
 
 	if (pVector && index < pVector->elementsCount)
 		{
-		if (pVector->deleter)
-			{
-			pVector->deleter(pVector->items[index]);
-			}
+		result = pVector->items[index];
 
 		size_t vectorTailSize = pVector->elementsCount - (index + 1);
 
 		if (vectorTailSize)
+			{
 			memmove(pVector->items + index, pVector->items + index + 1, vectorTailSize * sizeof(void *));
+			}
 
 		pVector->elementsCount -= 1;
-		rc = 0;
 		}
 
-	return rc;
+	return result;
 	}
 
 int
