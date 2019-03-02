@@ -5,7 +5,6 @@
 #include <assert.h>
 #include <memory.h>
 
-#include "../cmocker.h"
 #include "vector.h"
 
 void test1_smoke()
@@ -154,7 +153,7 @@ void test4_element_remove()
 
     }
 
-int main(int argc __cmocker_unused, char **argv __cmocker_unused)
+int main()
     {
     test1_smoke();
     test2_vector_enlarge();
