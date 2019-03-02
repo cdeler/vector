@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "utils/vector.h"
+#include "vector.h"
 #include "cmocker.h"
 
 typedef struct

@@ -1,12 +1,12 @@
-find_program(VALGRIND_PATH valgrind)
+FIND_PROGRAM(VALGRIND_PATH valgrind)
 
-function(add_valgrind_check _targetname _test_name)
-    if(NOT VALGRIND_PATH)
-        message(FATAL_ERROR "valgrind not found! Aborting...")
-    endif(NOT VALGRIND_PATH)
+FUNCTION(ADD_VALGRIND_CHECK _targetname _test_name)
+	IF (NOT VALGRIND_PATH)
+		MESSAGE(FATAL_ERROR "valgrind not found! Aborting...")
+	ENDIF (NOT VALGRIND_PATH)
 
-    add_custom_target(${_test_name}_valgrind
-            ${VALGRIND_PATH} --leak-check=full --show-reachable=yes --error-exitcode=1 $<TARGET_FILE:${_test_name}>
-            )
-    add_dependencies(valgrind ${_test_name}_valgrind)
-endfunction(add_valgrind_check _targetname _testrunner)
+	ADD_CUSTOM_TARGET(${_test_name}_valgrind
+			${VALGRIND_PATH} --leak-check=full --show-reachable=yes --error-exitcode=1 $<TARGET_FILE:${_test_name}>
+			)
+	ADD_DEPENDENCIES(valgrind ${_test_name}_valgrind)
+ENDFUNCTION(ADD_VALGRIND_CHECK _targetname _testrunner)
