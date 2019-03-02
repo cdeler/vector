@@ -9,7 +9,7 @@
 
 #include "vector.h"
 
-void test1_smoke()
+static void test_smoke()
 	{
 	Vector *v = vector_open();
 
@@ -22,7 +22,7 @@ void test1_smoke()
 	assert(rc == 0);
 	}
 
-void test3_vector_add()
+static void test_vector_add()
 	{
 	size_t rc;
 	Vector *pVector = vector_open();
@@ -40,7 +40,7 @@ void test3_vector_add()
 	assert(rc == 1);
 	}
 
-void test4_element_remove()
+static void test_removeAt()
 	{
 	Vector *pVector = vector_open();
 
@@ -113,7 +113,8 @@ void test4_element_remove()
 	}
 
 #define TEST5_VECTOR_SIZE (10000000ULL)
-void test5_multiple_adds()
+
+static void test_complex_with_multiple_realloc()
 	{
 	size_t i, val, N;
 	Vector *pVector = vector_open();
@@ -138,12 +139,65 @@ void test5_multiple_adds()
 	assert(val == TEST5_VECTOR_SIZE);
 	}
 
+static void test_insertAt()
+	{
+	size_t i;
+	int rc;
+	Vector *pVector = vector_open();
+	vector_set_deleter(pVector, NULL);
+
+	for (i = 0; i < 9; ++i)
+		{
+		vector_pushBack(pVector, (void *) i);
+		}
+
+	assert(vector_getLength(pVector) == 9);
+
+	rc = vector_insertAt(pVector, 9, (void *) 0xDEADBEEF);
+
+	assert(rc == 0);
+
+	static const size_t exectedArr1[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 0xDEADBEEF};
+	static const size_t exectedArr1Size = sizeof(exectedArr1) / sizeof(size_t);
+	assert(vector_getLength(pVector) == exectedArr1Size);
+
+	for (i = 0; i < exectedArr1Size; ++i)
+		{
+		assert(vector_elementAt(pVector, i) == (void *) exectedArr1[i]);
+		}
+
+	rc = vector_insertAt(pVector, 5, (void *) 0xCAFEBABE);
+	assert(rc == 0);
+
+	static const size_t exectedArr2[] = {0, 1, 2, 3, 4, 0xCAFEBABE, 5, 6, 7, 8, 0xDEADBEEF};
+	static const size_t exectedArr2Size = sizeof(exectedArr2) / sizeof(size_t);
+	assert(vector_getLength(pVector) == exectedArr2Size);
+
+	for (i = 0; i < exectedArr2Size; ++i)
+		{
+		assert(vector_elementAt(pVector, i) == (void *) exectedArr2[i]);
+		}
+
+	rc = vector_insertAt(pVector, 0x100, (void *) 0x100500);
+	assert(rc < 0);
+
+	assert(vector_getLength(pVector) == exectedArr2Size);
+	for (i = 0; i < exectedArr2Size; ++i)
+		{
+		assert(vector_elementAt(pVector, i) == (void *) exectedArr2[i]);
+		}
+
+
+	vector_close(&pVector);
+	}
+
 int main()
 	{
-	test1_smoke();
-	test3_vector_add();
-	test4_element_remove();
-	test5_multiple_adds();
+	test_smoke();
+	test_vector_add();
+	test_removeAt();
+	test_complex_with_multiple_realloc();
+	test_insertAt();
 
 	return 0;
 	}

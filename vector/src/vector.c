@@ -20,10 +20,10 @@ struct _vector
 	VectorDeleter deleter;
 };
 
-static void vector_enlarge(Vector *pVector) __attribute__((nonnull (1)));
+static void _vector_enlarge(Vector *pVector) __attribute__((nonnull (1)));
 
 static void
-vector_enlarge(Vector *pVector)
+_vector_enlarge(Vector *pVector)
 	{
 	assert(pVector);
 
@@ -73,7 +73,7 @@ vector_pushBack(Vector *pVector, void *item)
 		{
 		if (pVector->elementsCount == pVector->vectorSize)
 			{
-			vector_enlarge(pVector);
+			_vector_enlarge(pVector);
 			}
 
 		pVector->items[pVector->elementsCount++] = item;
@@ -166,6 +166,40 @@ vector_removeAt(Vector *pVector, size_t index)
 
 		pVector->elementsCount -= 1;
 		rc = 0;
+		}
+
+	return rc;
+	}
+
+int
+vector_insertAt(Vector *pVector, size_t index, void *value)
+	{
+	assert(pVector);
+	int rc = -1;
+	size_t tailSize;
+
+	if (pVector)
+		{
+		if (index == pVector->elementsCount)
+			{
+			rc = vector_pushBack(pVector, value);
+			}
+		else if (index < pVector->elementsCount)
+			{
+			if (pVector->elementsCount == pVector->vectorSize)
+				{
+				_vector_enlarge(pVector);
+				}
+
+			tailSize = pVector->elementsCount - index;
+
+			memmove(pVector->items + (index + 1), pVector->items + index, tailSize * sizeof(void *));
+			pVector->items[index] = value;
+
+			++pVector->elementsCount;
+
+			rc = 0;
+			}
 		}
 
 	return rc;

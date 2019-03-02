@@ -24,4 +24,6 @@ size_t vector_getLength(Vector *pVector) __attribute__((nonnull (1)));
 
 void vector_set_deleter(Vector *pVector, VectorDeleter deleter) __attribute__((nonnull (1)));
 
+int vector_insertAt(Vector *pVector, size_t index, void *value) __attribute__((nonnull (1)));
+
 #endif //CMOCKER_VECTOR_H
