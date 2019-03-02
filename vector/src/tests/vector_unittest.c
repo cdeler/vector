@@ -75,7 +75,7 @@ static void test_removeAt()
 	pVector = vector_open();
 	for (c = '0'; c <= '9'; ++c)
 		{
-		vector_pushBack(pVector, (void *) c);
+		vector_pushBack(pVector, (void *) (0ULL | c));
 		}
 	assert(vector_getLength(pVector) == 10);
 
