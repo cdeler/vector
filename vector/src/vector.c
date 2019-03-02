@@ -4,11 +4,25 @@
 
 #include <assert.h>
 #include <memory.h>
+#include <malloc.h>
 
 #include "vector.h"
 
+#define ENLARGE_FACTOR(_x) (10ULL + (_x) * 3 / 2)
 
-void
+struct _vector
+{
+	char eyeCatcher[sizeof(VECTOR_EYECATCHER_VALUE)];
+	size_t vectorSize;
+	size_t elementsCount;
+	void **items;
+
+	VectorDeleter deleter;
+};
+
+static void vector_enlarge(Vector *pVector) __attribute__((nonnull (1)));
+
+static void
 vector_enlarge(Vector *pVector)
 	{
 	assert(pVector);
@@ -49,7 +63,7 @@ vector_open(void)
 	}
 
 int
-vector_add(Vector *pVector, void *item)
+vector_pushBack(Vector *pVector, void *item)
 	{
 	assert(pVector);
 
@@ -74,7 +88,7 @@ size_t
 vector_close(Vector **ppVector)
 	{
 	assert(ppVector);
-	size_t rc = 0;
+	size_t rc = 0, i;
 
 	if (ppVector)
 		{
@@ -82,21 +96,15 @@ vector_close(Vector **ppVector)
 
 		if (pVector)
 			{
-			size_t i;
-
 			if (pVector->deleter)
 				{
-				for (i = 0, rc = 0; i < pVector->elementsCount; ++i, ++rc)
+				for (i = 0; i < pVector->elementsCount; ++i)
 					{
-					void *item = pVector->items[i];
-
-					pVector->deleter(item);
-
-					rc += 1;
+					pVector->deleter(pVector->items[i]);
 					}
-
-				rc = i;
 				}
+
+			rc = pVector->elementsCount;
 
 			free(pVector->items);
 			free(pVector);
@@ -137,6 +145,7 @@ vector_getLength(Vector *pVector)
 	return pVector ? pVector->elementsCount : 0;
 	}
 
+
 int
 vector_removeAt(Vector *pVector, size_t index)
 	{
@@ -145,17 +154,15 @@ vector_removeAt(Vector *pVector, size_t index)
 
 	if (pVector && index < pVector->elementsCount)
 		{
-		void *element = pVector->items[index];
-
 		if (pVector->deleter)
-			pVector->deleter(element);
+			{
+			pVector->deleter(pVector->items[index]);
+			}
 
 		size_t vectorTailSize = pVector->elementsCount - (index + 1);
 
 		if (vectorTailSize)
 			memmove(pVector->items + index, pVector->items + index + 1, vectorTailSize * sizeof(void *));
-
-		pVector->items[pVector->elementsCount - 1] = NULL;
 
 		pVector->elementsCount -= 1;
 		rc = 0;

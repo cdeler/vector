@@ -6,6 +6,7 @@
 #include <zconf.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <malloc.h>
 
 #include "vector.h"
 #include "cmocker.h"
@@ -93,7 +94,7 @@ cmocker_mock(void *originalFunction, void *mockFunction)
             handle->mockedHeader = instruction;
             handle->originHeader = *originalFunctionWords;
             handle->isMocked = true;
-            vector_add(_functionHandles, handle);
+            vector_pushBack(_functionHandles, handle);
 
             *originalFunctionWords = instruction;
 
