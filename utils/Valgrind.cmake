@@ -1,5 +1,9 @@
 FIND_PROGRAM(VALGRIND_PATH valgrind)
 
+IF (NOT TARGET valgrind)
+	ADD_CUSTOM_TARGET(valgrind)
+ENDIF (NOT TARGET valgrind)
+
 FUNCTION(ADD_VALGRIND_CHECK _targetname _test_name)
 	IF (NOT VALGRIND_PATH)
 		MESSAGE(FATAL_ERROR "valgrind not found! Aborting...")
