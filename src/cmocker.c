@@ -20,6 +20,9 @@ typedef struct
 	int isMocked;
 } FunctionHandle;
 
+static int _change_page_permissions_of_address(void *addr, int perms);
+static ssize_t _is_already_mocked(void *function);
+
 static Vector *_functionHandles = NULL;
 
 static void __attribute__((constructor)) __cmocker_used
@@ -58,7 +61,7 @@ _is_already_mocked(void *function)
 	}
 
 static int
-change_page_permissions_of_address(void *addr, int perms)
+_change_page_permissions_of_address(void *addr, int perms)
 	{
 	// Move the pointer to the page boundary
 	size_t page_size = (size_t) getpagesize();
@@ -86,7 +89,7 @@ cmocker_mock(void *originalFunction, void *mockFunction)
 
 		int32_t offset = (int64_t) mockFunctionWords - ((int64_t) originalFunctionWords + 5 * sizeof(char));
 
-		rc = change_page_permissions_of_address(originalFunction, PROT_READ | PROT_WRITE | PROT_EXEC);
+		rc = _change_page_permissions_of_address(originalFunction, PROT_READ | PROT_WRITE | PROT_EXEC);
 
 		if (!rc)
 			{
