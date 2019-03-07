@@ -5,7 +5,7 @@ os: linux
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq valgrind
+  - sudo apt-get install -qq valgrind libcmocka-dev
 compiler:
   - gcc
   - clang
