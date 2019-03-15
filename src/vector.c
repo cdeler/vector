@@ -18,38 +18,52 @@ struct _vector
 	void **items;
 
 	VectorDeleter deleter;
+	VectorCopier copier;
 };
 
+__attribute__((always_inline))
 static void _vector_enlarge(Vector *pVector) __attribute__((nonnull (1)));
 
 static void
 _vector_enlarge(Vector *pVector)
 	{
-	assert(pVector);
+	vector_resize(pVector, ENLARGE_FACTOR(pVector->vectorSize));
+	}
 
-	if (pVector)
+int
+vector_resize(Vector *this, size_t newSize)
+	{
+	int rc;
+
+	assert(this);
+
+	rc = -1;
+
+	if (this && this->vectorSize < newSize)
 		{
-		if (!pVector->vectorSize)
+		if (this->vectorSize != 0)
 			{
-			assert(pVector->items == NULL);
+			assert(this->items);
 
-			pVector->vectorSize = ENLARGE_FACTOR(pVector->vectorSize);
-			pVector->items = malloc(pVector->vectorSize * sizeof(void *));
+			this->vectorSize = newSize;
+			this->items = realloc(this->items, newSize * sizeof(void *));
 
-			assert(pVector->items);
+			assert(this->items);
 			}
 		else
 			{
-			assert(pVector->items);
+			assert(this->items == NULL);
 
-			pVector->vectorSize = ENLARGE_FACTOR(pVector->vectorSize);
-			const size_t newSize = pVector->vectorSize * sizeof(void *);
-			pVector->items = realloc(pVector->items, newSize);
+			this->vectorSize = newSize;
+			this->items = malloc(newSize * sizeof(void *));
 
-			assert(pVector->items);
+			assert(this->items);
 			}
+
+		rc = 0;
 		}
 
+	return rc;
 	}
 
 Vector *
@@ -96,17 +110,21 @@ vector_close(Vector **ppVector)
 
 		if (pVector)
 			{
-			if (pVector->deleter)
-				{
-				for (i = 0; i < pVector->elementsCount; ++i)
-					{
-					pVector->deleter(pVector->items[i]);
-					}
-				}
-
 			rc = pVector->elementsCount;
 
-			free(pVector->items);
+			if (pVector->items)
+				{
+				if (pVector->deleter)
+					{
+					for (i = 0; i < pVector->elementsCount; ++i)
+						{
+						pVector->deleter(pVector->items[i]);
+						}
+					}
+
+				free(pVector->items);
+				}
+
 			free(pVector);
 			}
 
@@ -201,4 +219,58 @@ vector_insertAt(Vector *pVector, size_t index, void *value)
 		}
 
 	return rc;
+	}
+
+Vector *
+vector_concat(Vector *this, Vector *other)
+	{
+	size_t newElementsCount, newVectorSize, i;
+
+	if (this == NULL)
+		{
+		this = vector_open();
+
+		assert(this);
+
+		if (other)
+			{
+			this->copier = other->copier;
+			this->deleter = other->deleter;
+			}
+		}
+
+	if (other)
+		{
+		assert(this->copier == other->copier);
+
+		newElementsCount = this->elementsCount + other->elementsCount;
+		newVectorSize = (newElementsCount < this->vectorSize) ?
+		                this->vectorSize :
+		                newElementsCount;
+
+		vector_resize(this, newVectorSize);
+
+		if (other->copier)
+			{
+			const VectorCopier copier = other->copier;
+
+			for (i = 0; i < other->elementsCount; ++i)
+				{
+				void *value = vector_elementAt(other, i);
+				void *copy = copier(value);
+				vector_pushBack(this, copy);
+				}
+			}
+		else
+			{
+			void *dest = this->items + this->elementsCount;
+			const void *source = other->items;
+
+			memmove(dest, source, other->elementsCount * sizeof(void *));
+
+			this->elementsCount = newElementsCount;
+			}
+		}
+
+	return this;
 	}
