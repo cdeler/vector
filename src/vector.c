@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <memory.h>
 #include <malloc.h>
+#include <stdlib.h>
 
 #include "vector.h"
 
@@ -273,4 +274,13 @@ vector_concat(Vector *this, Vector *other)
 		}
 
 	return this;
+	}
+
+void
+vector_sort(Vector *this, VectorItemComparator cmp)
+	{
+	assert(this);
+	assert(cmp);
+
+	qsort(this->items, this->elementsCount, sizeof(void *), cmp);
 	}

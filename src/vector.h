@@ -14,6 +14,8 @@ typedef void (*VectorDeleter)(void *vectorItem);
 
 typedef void *(*VectorCopier)(const void *vectorItem);
 
+typedef int (*VectorItemComparator)(const void *item1, const void *item2);
+
 typedef struct _vector Vector;
 
 Vector *vector_open(void) __attribute__ ((warn_unused_result));
@@ -35,5 +37,7 @@ int vector_insertAt(Vector *pVector, size_t index, void *value) __attribute__((n
 int vector_resize(Vector *this, size_t newSize) __attribute__((nonnull (1)));
 
 Vector *vector_concat(Vector *this, Vector *other);
+
+void vector_sort(Vector *this, VectorItemComparator cmp) __attribute__((nonnull (1, 2)));
 
 #endif //CMOCKER_VECTOR_H
