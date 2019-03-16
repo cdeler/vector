@@ -32,34 +32,32 @@ _vector_enlarge(Vector *pVector)
 	}
 
 int
-vector_resize(Vector *this, size_t newSize)
+vector_resize(Vector *pVector, size_t newSize)
 	{
 	int rc;
 
-	assert(this);
+	assert(pVector);
 
 	rc = -1;
 
-	if (this && this->vectorSize < newSize)
+	if (pVector && pVector->vectorSize < newSize)
 		{
-		if (this->vectorSize != 0)
+		if (pVector->vectorSize != 0)
 			{
-			assert(this->items);
+			assert(pVector->items);
 
-			this->vectorSize = newSize;
-			this->items = realloc(this->items, newSize * sizeof(void *));
-
-			assert(this->items);
+			pVector->vectorSize = newSize;
+			pVector->items = realloc(pVector->items, newSize * sizeof(void *));
 			}
 		else
 			{
-			assert(this->items == NULL);
+			assert(pVector->items == NULL);
 
-			this->vectorSize = newSize;
-			this->items = malloc(newSize * sizeof(void *));
-
-			assert(this->items);
+			pVector->vectorSize = newSize;
+			pVector->items = malloc(newSize * sizeof(void *));
 			}
+
+		assert(pVector->items);
 
 		rc = 0;
 		}
@@ -223,64 +221,85 @@ vector_insertAt(Vector *pVector, size_t index, void *value)
 	}
 
 Vector *
-vector_concat(Vector *this, Vector *other)
+vector_concat(Vector *first, Vector *second)
 	{
 	size_t newElementsCount, newVectorSize, i;
 
-	if (this == NULL)
+	if (first == NULL)
 		{
-		this = vector_open();
+		first = vector_open();
 
-		assert(this);
+		assert(first);
 
-		if (other)
+		if (second)
 			{
-			this->copier = other->copier;
-			this->deleter = other->deleter;
+			first->copier = second->copier;
+			first->deleter = second->deleter;
 			}
 		}
 
-	if (other)
+	if (second)
 		{
-		assert(this->copier == other->copier);
+		assert(first->copier == second->copier);
 
-		newElementsCount = this->elementsCount + other->elementsCount;
-		newVectorSize = (newElementsCount < this->vectorSize) ?
-		                this->vectorSize :
+		newElementsCount = first->elementsCount + second->elementsCount;
+		newVectorSize = (newElementsCount < first->vectorSize) ?
+		                first->vectorSize :
 		                newElementsCount;
 
-		vector_resize(this, newVectorSize);
+		vector_resize(first, newVectorSize);
 
-		if (other->copier)
+		if (second->copier)
 			{
-			const VectorCopier copier = other->copier;
+			const VectorCopier copier = second->copier;
 
-			for (i = 0; i < other->elementsCount; ++i)
+			for (i = 0; i < second->elementsCount; ++i)
 				{
-				void *value = vector_elementAt(other, i);
+				void *value = vector_elementAt(second, i);
 				void *copy = copier(value);
-				vector_pushBack(this, copy);
+				vector_pushBack(first, copy);
 				}
 			}
 		else
 			{
-			void *dest = this->items + this->elementsCount;
-			const void *source = other->items;
+			void *dest = first->items + first->elementsCount;
+			const void *source = second->items;
 
-			memmove(dest, source, other->elementsCount * sizeof(void *));
+			memmove(dest, source, second->elementsCount * sizeof(void *));
 
-			this->elementsCount = newElementsCount;
+			first->elementsCount = newElementsCount;
 			}
 		}
 
-	return this;
+	return first;
 	}
 
 void
-vector_sort(Vector *this, VectorItemComparator cmp)
+vector_sort(Vector *pVector, VectorItemComparator cmp)
 	{
-	assert(this);
+	assert(pVector);
 	assert(cmp);
 
-	qsort(this->items, this->elementsCount, sizeof(void *), cmp);
+	qsort(pVector->items, pVector->elementsCount, sizeof(void *), cmp);
+	}
+
+void
+vector_shuffle(Vector *pVector)
+	{
+	size_t i, j;
+	void *buf;
+
+	const size_t N = pVector->elementsCount;
+
+	for (i = N - 1; i >= 1; --i)
+		{
+		j = vector_random_get_next(0, i);
+
+		if (j != i)
+			{
+			buf = pVector->items[i];
+			pVector->items[i] = pVector->items[j];
+			pVector->items[j] = buf;
+			}
+		}
 	}
