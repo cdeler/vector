@@ -1,3 +1,5 @@
+#include <memory>
+
 //
 // Created by cdeler on 3/15/19.
 //
@@ -20,10 +22,12 @@ namespace cdeler
 			std::uniform_int_distribution<size_t> distribution;
 
 		public:
-			explicit RandomGenerator(const int s = 0) : generator{s}, distribution{0, 1}
+			explicit RandomGenerator(const int &s = 0) : generator{s}, distribution{0, 1}
 				{}
 
-			size_t get_next(size_t min, size_t max)
+			virtual ~RandomGenerator() = default;
+
+			size_t get_next(size_t min, size_t max) noexcept
 				{
 				std::uniform_int_distribution<size_t>::param_type para{min, max};
 				distribution.param(para);
@@ -34,7 +38,7 @@ namespace cdeler
 	};
 };
 
-static std::unique_ptr<cdeler::vector::RandomGenerator> __generator = nullptr;
+static std::unique_ptr<cdeler::vector::RandomGenerator> __generator(nullptr);
 
 static void __attribute__((constructor, used))
 __module_init()
@@ -43,8 +47,9 @@ __module_init()
 	using namespace std::chrono;
 
 	const int seed = (int) system_clock::now().time_since_epoch().count();
-	__generator = std::make_unique<RandomGenerator>(RandomGenerator(seed));
+	__generator = std::make_unique<RandomGenerator>(seed);
 	}
+
 
 #ifdef __cplusplus
 extern "C"
@@ -60,7 +65,7 @@ vector_random_seed(const int seed)
 		__generator = nullptr;
 		}
 
-	__generator = std::make_unique<RandomGenerator>(RandomGenerator(seed));
+	__generator = std::make_unique<RandomGenerator>(seed);
 	}
 
 
