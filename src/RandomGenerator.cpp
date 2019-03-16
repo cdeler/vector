@@ -10,24 +10,27 @@
 
 #include "vector.h"
 
-namespace cdeler::vector
+namespace cdeler
 {
-	class RandomGenerator
+	namespace vector
 	{
-		std::default_random_engine generator;
-		std::uniform_int_distribution<size_t> distribution;
+		class RandomGenerator
+		{
+			std::default_random_engine generator;
+			std::uniform_int_distribution<size_t> distribution;
 
-	public:
-		explicit RandomGenerator(const int s = 0) : generator{s}, distribution{0, 1}
-			{}
+		public:
+			explicit RandomGenerator(const int s = 0) : generator{s}, distribution{0, 1}
+				{}
 
-		size_t get_next(size_t min, size_t max)
-			{
-			std::uniform_int_distribution<size_t>::param_type para{min, max};
-			distribution.param(para);
+			size_t get_next(size_t min, size_t max)
+				{
+				std::uniform_int_distribution<size_t>::param_type para{min, max};
+				distribution.param(para);
 
-			return distribution(generator);
-			}
+				return distribution(generator);
+				}
+		};
 	};
 };
 
